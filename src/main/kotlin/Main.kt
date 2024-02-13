@@ -1,4 +1,8 @@
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.File
 import java.util.*
+
 
 fun main() {
     val contacts = mutableListOf<Person>()
@@ -6,7 +10,6 @@ fun main() {
         println("Введите команду:")
         val command = readCommand()
         when {
-
             command is AddCommand -> {
                 if (command.isValid()) {
                     val contact = contacts.find { it.name == command.name }
@@ -43,7 +46,16 @@ fun main() {
                     printHelp()
                 }
             }
-
+            command is ExportCommand -> {
+                if (contacts.isNotEmpty()) {
+                    val json = toJson(contacts)
+                    File("C:/Users/Acer/Desktop/Kotlin-seminar3/myfile.json").writeText(json)
+                    println("  ")
+                } else {
+                    println("Not initialized")
+                    printHelp()
+                }
+            }
             command is HelpCommand -> {
                 printHelp()
             }
@@ -57,12 +69,14 @@ fun main() {
     }
 }
 
+
 fun printHelp() {
     println("Команды:")
     println("add <Имя> phone <Номер телефона> - добавить номер телефона")
     println("add <Имя> email <Адрес электронной почты> - добавить адрес электронной почты")
     println("show <Имя> - показать контакт с именем <Имя>")
     println("find <Номер или email> - показать контакт c <Номер или email>")
+    println("export - экспортирует внесенные данные")
     println("help - отобразить эту помощь")
     println("exit - выход из программы")
 }
@@ -87,6 +101,9 @@ fun readCommand(): Command {
             val (value ) = remainingWords.take(1).toTypedArray()
             FindCommand(value)
         }
+        "export" -> {
+            ExportCommand()
+        }
         "help" -> {
             HelpCommand()
         }
@@ -98,24 +115,33 @@ fun readCommand(): Command {
             HelpCommand()
         }
     }
-
-
-
 }
+
 fun personAdd(addCommand: AddCommand, person: Person) {
     if(addCommand.type == "phone"){
-        person.addPhone(addCommand.value)
-        println("Добавлен ${person.name} телефон ${person.phoneList}")
+        if (person.phoneList == null) {
+            person.phoneList = mutableSetOf(addCommand.value)
+            println("added1 ${person.name} phone ${person.phoneList}")
+        } else {
+            person.phoneList?.add(addCommand.value)
+            println("added2 ${person.name} phone ${person.phoneList}")
+        }
     } else if (addCommand.type == "email"){
-        person.addEmail(addCommand.value)
-        println("Добавлен ${person.name} email ${person.emailList}")
+        if (person.emailList == null) {
+            person.emailList = mutableSetOf(addCommand.value)
+            println("added1 ${person.name} email ${person.emailList}")
+        } else {
+            person.emailList?.add(addCommand.value)
+            println("added2 ${person.name} email ${person.emailList}")
+        }
     }
-
 }
+
+
 
 fun personShow(person: Person) {
     if (person.phoneList != null || person.emailList != null) {
-        println("Имя: ${person.name} Телефон: ${person.phoneList} email: ${person.emailList}e")
+        println("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}e")
     }
 }
 
@@ -140,6 +166,13 @@ fun find(query: String, contacts: MutableList<Person>): List<Person> {
 
 fun printResult(result: List<Person>) {
     for (person in result) {
-        println("Имя: ${person.name} Телефон: ${person.phoneList} email: ${person.emailList}")
+        println("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}")
     }
+}
+
+fun toJson(result: List<Person>): String {
+    val jsonStrings = result.toSet().map { person ->
+        Json.encodeToString("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}")
+    }
+    return jsonStrings.joinToString("\n")
 }
