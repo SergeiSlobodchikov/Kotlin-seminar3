@@ -1,1 +1,4 @@
-sealed class Command
+sealed class Command {
+    abstract fun isValid(): Boolean
+
+}
