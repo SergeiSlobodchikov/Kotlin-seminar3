@@ -1,5 +1,3 @@
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.*
 
@@ -48,8 +46,8 @@ fun main() {
             }
             command is ExportCommand -> {
                 if (contacts.isNotEmpty()) {
-                    val json = toJson(contacts)
-                    File("C:/Users/Acer/Desktop/Kotlin-seminar3/myfile.json").writeText(json)
+                    val `string-json`:String = totResult(contacts)
+                    File("C:/Users/Acer/Desktop/Kotlin-seminar3/myfile.json").writeText(`string-json`.toJson())
                     println("  ")
                 } else {
                     println("Not initialized")
@@ -170,9 +168,19 @@ fun printResult(result: List<Person>) {
     }
 }
 
-fun toJson(result: List<Person>): String {
-    val jsonStrings = result.toSet().map { person ->
-        Json.encodeToString("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}")
+fun totResult(result: List<Person>): String {
+    val list = result.toSet().map { person ->  ("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}")
     }
-    return jsonStrings.joinToString("\n")
+    return list.joinToString("\n")
+}
+fun Any.toJson(): String {
+    return when (this) {
+        is String -> "\"$this\""
+        is Int -> this.toString()
+        is Long -> this.toString()
+        is Double -> this.toString()
+        is Float -> this.toString()
+        is Boolean -> this.toString()
+        else -> throw IllegalArgumentException("Не поддерживаемый тип данных")
+    }
 }
