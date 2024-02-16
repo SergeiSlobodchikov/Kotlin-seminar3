@@ -46,8 +46,7 @@ fun main() {
             }
             command is ExportCommand -> {
                 if (contacts.isNotEmpty()) {
-                    val `string-json`:String = totResult(contacts)
-                    File("C:/Users/Acer/Desktop/Kotlin-seminar3/myfile.json").writeText(`string-json`.toJson())
+                    File("C:/Users/Acer/Desktop/Kotlin-seminar3/myfile.json").writeText(toJson(contacts))
                     println("  ")
                 } else {
                     println("Not initialized")
@@ -66,6 +65,8 @@ fun main() {
         }
     }
 }
+
+
 
 
 fun printHelp() {
@@ -168,19 +169,50 @@ fun printResult(result: List<Person>) {
     }
 }
 
-fun totResult(result: List<Person>): String {
-    val list = result.toSet().map { person ->  ("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}")
+fun toJson(contacts: List<Person>): String {
+    val contactsNew = contacts.toSet()
+    val json = StringBuilder()
+    json.append("[")
+    for (person in contactsNew) {
+        json.append("{\"name\":\"${person.name}\",\"phones\":[")
+        if (person.phoneList != null && person.phoneList!!.isNotEmpty()) {
+            for (phone in person.phoneList!!) {
+                json.append("\"$phone\",")
+            }
+        } else {
+            json.append("\"- no phone -\",")
+        }
+        json.deleteCharAt(json.length - 1) // удаляем последнюю запятую
+        json.append("],\"emails\":[")
+        if (person.emailList != null && person.emailList!!.isNotEmpty()) {
+            for (email in person.emailList!!) {
+                json.append("\"$email\",")
+            }
+        } else {
+            json.append("\"- no email -\",")
+        }
+        json.deleteCharAt(json.length - 1) // удаляем последнюю запятую
+        json.append("]}")
+        if (person != contactsNew.last()) {
+            json.append(",")
+        }
     }
-    return list.joinToString("\n")
+    json.append("]")
+    return json.toString()
 }
-fun Any.toJson(): String {
-    return when (this) {
-        is String -> "\"$this\""
-        is Int -> this.toString()
-        is Long -> this.toString()
-        is Double -> this.toString()
-        is Float -> this.toString()
-        is Boolean -> this.toString()
-        else -> throw IllegalArgumentException("Не поддерживаемый тип данных")
-    }
-}
+//fun totResult(result: List<Person>): String {
+//    val list = result.toSet().map { person ->  ("Name: ${person.name} Phone: ${person.phoneList} email: ${person.emailList}")
+//    }
+//    return list.joinToString("/n")
+//}
+//fun Any.toJson(): String {
+//    return when (this) {
+//        is String -> "\"$this\""
+//        is Int -> this.toString()
+//        is Long -> this.toString()
+//        is Double -> this.toString()
+//        is Float -> this.toString()
+//        is Boolean -> this.toString()
+//        else -> throw IllegalArgumentException("Не поддерживаемый тип данных")
+//    }
+//}
